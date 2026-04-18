@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Truck, LogOut, Bell, Search, LayoutDashboard, Package } from 'lucide-react';
+import { Truck, LogOut, Bell, Search, LayoutDashboard, Package, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -9,7 +9,9 @@ const Navbar = () => {
 
     const navItems = [
         { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-        { name: 'Orders', path: '/orders', icon: Package }
+        { name: 'Orders', path: '/orders', icon: Package },
+        { name: 'Fleet', path: '/vehicles', icon: Truck },
+        { name: 'Profile', path: '/profile', icon: User }
     ];
 
     return (

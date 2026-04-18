@@ -81,7 +81,38 @@ const loginUser = async (req, res) => {
     }
 };
 
+// @desc    Update user password
+// @route   PUT /api/auth/password
+// @access  Private
+const updatePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Please provide current and new passwords' });
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [req.user.id]);
+        const user = rows[0];
+
+        if (user && (await bcrypt.compare(currentPassword, user.password))) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+            await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, req.user.id]);
+
+            res.json({ success: true, message: 'Password synchronization complete' });
+        } else {
+            res.status(401).json({ success: false, message: 'Invalid current credentials' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error during credential update' });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
+    updatePassword
 };

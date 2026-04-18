@@ -6,6 +6,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
+import Vehicles from './pages/Vehicles';
+import Profile from './pages/Profile';
 import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +48,22 @@ const AppContent = () => {
                     element={
                         <ProtectedRoute>
                             <OrderDetails />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/vehicles" 
+                    element={
+                        <ProtectedRoute>
+                            <Vehicles />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/profile" 
+                    element={
+                        <ProtectedRoute>
+                            <Profile />
                         </ProtectedRoute>
                     } 
                 />
