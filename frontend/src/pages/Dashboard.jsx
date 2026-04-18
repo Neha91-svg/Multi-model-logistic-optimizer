@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
     LayoutDashboard, Clock, CheckCircle2, Package, Truck, XCircle, 
-    TrendingUp, Activity, Star, Calendar, ArrowRight, User, LogOut
+    TrendingUp, Activity, Star, Calendar, ArrowRight, User, LogOut,
+    Plus, Send, Check
 } from 'lucide-react';
 import { 
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import StatsCard from '../components/StatsCard';
+import CreateOrderModal from '../components/CreateOrderModal';
 
 const Dashboard = () => {
   const { user, api, logout } = useAuth();
@@ -20,25 +22,44 @@ const Dashboard = () => {
   });
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      const [dashRes, ordersRes] = await Promise.all([
+        api.get('/dashboard'),
+        api.get('/orders')
+      ]);
+      setData(dashRes.data.data);
+      setOrders(ordersRes.data.data);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [api]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [dashRes, ordersRes] = await Promise.all([
-          api.get('/dashboard'),
-          api.get('/orders')
-        ]);
-        setData(dashRes.data.data);
-        setOrders(ordersRes.data.data);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboardData();
-  }, [api]);
+  }, [fetchDashboardData]);
+
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    try {
+        await api.put(`/orders/${orderId}`, { status: newStatus });
+        fetchDashboardData();
+    } catch (error) {
+        alert(error.response?.data?.message || 'Failed to update status');
+    }
+  };
+
+  const handleAutoAssign = async (orderId) => {
+    try {
+        await api.post(`/orders/${orderId}/assign`);
+        fetchDashboardData();
+    } catch (error) {
+        alert(error.response?.data?.message || 'Failed to assign vehicle');
+    }
+  };
 
   if (loading) {
     return (
@@ -60,6 +81,13 @@ const Dashboard = () => {
           <p className="text-text-muted mt-2">Here's what's happening with your logistics today.</p>
         </div>
         <div className="flex gap-4">
+            <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-primary hover:bg-indigo-600 px-6 py-2 rounded-xl flex items-center gap-2 text-white font-bold transition-all shadow-lg shadow-primary/20"
+            >
+                <Plus className="w-5 h-5" />
+                New Order
+            </button>
             <div className="hidden md:flex glass px-4 py-2 rounded-xl items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-lg">
                     <Calendar className="w-4 h-4 text-green-500" />
@@ -215,7 +243,7 @@ const Dashboard = () => {
         <div className="p-6 border-b border-border flex justify-between items-center">
             <h2 className="text-xl font-bold flex items-center gap-2">
                 <LayoutDashboard className="w-5 h-5 text-primary" />
-                Recent Orders
+                Order Management
             </h2>
             <button className="text-xs text-primary hover:underline font-bold">View All</button>
         </div>
@@ -224,19 +252,34 @@ const Dashboard = () => {
             <thead>
               <tr className="bg-bg-dark text-text-muted text-sm uppercase tracking-wider">
                 <th className="p-4 font-semibold">ID</th>
-                <th className="p-4 font-semibold">Pickup</th>
-                <th className="p-4 font-semibold">Delivery</th>
-                <th className="p-4 font-semibold">Weight</th>
+                <th className="p-4 font-semibold">Route</th>
+                <th className="p-4 font-semibold">Vehicle</th>
                 <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.slice(0, 10).map((order) => (
-                <tr key={order.id} className="border-b border-border hover:bg-white/5 transition-colors">
+                <tr key={order.id} className="border-b border-border hover:bg-white/5 transition-all">
                   <td className="p-4 font-medium text-text-main">#{order.id}</td>
-                  <td className="p-4 text-text-muted text-sm">{order.pickup}</td>
-                  <td className="p-4 text-text-muted text-sm">{order.delivery}</td>
-                  <td className="p-4 font-mono text-sm">{order.weight} kg</td>
+                  <td className="p-4 text-sm">
+                    <div className="flex flex-col">
+                        <span className="text-text-main font-medium">{order.pickup}</span>
+                        <ArrowRight className="w-3 h-3 text-text-muted my-1" />
+                        <span className="text-text-main font-medium">{order.delivery}</span>
+                        <span className="text-[10px] text-text-muted mt-1 uppercase tracking-widest font-bold">{order.weight} kg</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-text-muted text-sm capitalize">
+                    {order.vehicle_type ? (
+                        <div className="flex items-center gap-2">
+                            <Truck className="w-4 h-4 text-primary" />
+                            {order.vehicle_type}
+                        </div>
+                    ) : (
+                        <span className="italic opacity-50">Pending Assignment</span>
+                    )}
+                  </td>
                   <td className="p-4">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${
                       order.status === 'delivered' ? 'bg-green-500/20 text-green-400' :
@@ -246,6 +289,37 @@ const Dashboard = () => {
                     }`}>
                       {order.status}
                     </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <div className="flex justify-end gap-2">
+                        {order.status === 'pending' && (
+                            <button 
+                                onClick={() => handleAutoAssign(order.id)}
+                                title="Auto Assign Vehicle"
+                                className="p-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors border border-primary/20"
+                            >
+                                <Truck className="w-4 h-4" />
+                            </button>
+                        )}
+                        {order.status === 'assigned' && (
+                            <button 
+                                onClick={() => handleStatusUpdate(order.id, 'shipped')}
+                                title="Mark as Shipped"
+                                className="p-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-lg transition-colors border border-indigo-500/20"
+                            >
+                                <Send className="w-4 h-4" />
+                            </button>
+                        )}
+                        {order.status === 'shipped' && (
+                            <button 
+                                onClick={() => handleStatusUpdate(order.id, 'delivered')}
+                                title="Mark as Delivered"
+                                className="p-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-colors border border-green-500/20"
+                            >
+                                <Check className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -260,6 +334,13 @@ const Dashboard = () => {
           </table>
         </div>
       </section>
+
+      <CreateOrderModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchDashboardData}
+        api={api}
+      />
     </div>
   );
 };

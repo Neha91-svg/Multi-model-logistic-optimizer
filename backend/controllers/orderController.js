@@ -1,6 +1,46 @@
 const pool = require('../config/db');
 
-// @desc    Create new order and automatically assign vehicle/route
+// Helper to find and assign a vehicle to an order
+const autoAssignVehicle = async (connection, orderId, weight) => {
+    // Find a vehicle with enough capacity
+    // For simplicity, we pick the first one available with enough capacity
+    const [vehicles] = await connection.query(
+        'SELECT * FROM vehicles WHERE capacity >= ? LIMIT 1',
+        [weight]
+    );
+
+    if (vehicles.length > 0) {
+        const vehicle = vehicles[0];
+
+        // Generate dummy distance and time
+        const dummyDistance = (Math.random() * (100 - 10) + 10).toFixed(2); // 10 to 100 km
+        const dummyTimeHours = Math.floor(dummyDistance / 40) + 1; // Approx 40km/h + 1hr buffer
+        const dummyTime = `${dummyTimeHours} hour(s) ${Math.floor(Math.random() * 60)} mins`;
+
+        // Store the route
+        await connection.query(
+            'INSERT INTO routes (order_id, vehicle_id, distance, time) VALUES (?, ?, ?, ?)',
+            [orderId, vehicle.id, dummyDistance, dummyTime]
+        );
+
+        // Update order status to assigned
+        await connection.query(
+            'UPDATE orders SET status = ? WHERE id = ?',
+            ['assigned', orderId]
+        );
+
+        return {
+            vehicle_id: vehicle.id,
+            vehicle_type: vehicle.type,
+            distance: dummyDistance,
+            time: dummyTime,
+            status: 'assigned'
+        };
+    }
+    return null;
+};
+
+// @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 const createOrder = async (req, res) => {
@@ -22,43 +62,8 @@ const createOrder = async (req, res) => {
         );
         const orderId = orderResult.insertId;
 
-        // 2. Find a vehicle with enough capacity
-        // For simplicity, we pick the first one available with enough capacity
-        const [vehicles] = await connection.query(
-            'SELECT * FROM vehicles WHERE capacity >= ? LIMIT 1',
-            [weight]
-        );
-
-        let assignmentInfo = null;
-
-        if (vehicles.length > 0) {
-            const vehicle = vehicles[0];
-
-            // 3. Generate dummy distance and time
-            const dummyDistance = (Math.random() * (100 - 10) + 10).toFixed(2); // 10 to 100 km
-            const dummyTimeHours = Math.floor(dummyDistance / 40) + 1; // Approx 40km/h + 1hr buffer
-            const dummyTime = `${dummyTimeHours} hour(s) ${Math.floor(Math.random() * 60)} mins`;
-
-            // 4. Store the route
-            await connection.query(
-                'INSERT INTO routes (order_id, vehicle_id, distance, time) VALUES (?, ?, ?, ?)',
-                [orderId, vehicle.id, dummyDistance, dummyTime]
-            );
-
-            // 5. Update order status to assigned
-            await connection.query(
-                'UPDATE orders SET status = ? WHERE id = ?',
-                ['assigned', orderId]
-            );
-
-            assignmentInfo = {
-                vehicle_id: vehicle.id,
-                vehicle_type: vehicle.type,
-                distance: dummyDistance,
-                time: dummyTime,
-                status: 'assigned'
-            };
-        }
+        // 2. Attempt auto-assignment
+        const assignmentInfo = await autoAssignVehicle(connection, orderId, weight);
 
         await connection.commit();
 
@@ -70,13 +75,48 @@ const createOrder = async (req, res) => {
                 delivery,
                 weight,
                 status: assignmentInfo ? 'assigned' : 'pending',
-                assignment: assignmentInfo || 'No suitable vehicle found at the moment'
+                assignment: assignmentInfo || 'No suitable vehicle found at the moment. Order is pending.'
             }
         });
     } catch (error) {
         if (connection) await connection.rollback();
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error while creating order' });
+    } finally {
+        if (connection) connection.release();
+    }
+};
+
+// @desc    Manually trigger auto-assignment for a pending order
+// @route   POST /api/orders/:id/assign
+// @access  Private
+const assignOrder = async (req, res) => {
+    const orderId = req.params.id;
+    let connection;
+
+    try {
+        connection = await pool.getConnection();
+        const [orders] = await connection.query('SELECT * FROM orders WHERE id = ?', [orderId]);
+        
+        if (orders.length === 0) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        const order = orders[0];
+        if (order.status !== 'pending') {
+            return res.status(400).json({ success: false, message: `Order is already ${order.status}` });
+        }
+
+        const assignmentInfo = await autoAssignVehicle(connection, orderId, order.weight);
+
+        if (!assignmentInfo) {
+            return res.status(400).json({ success: false, message: 'No suitable vehicle available for this order' });
+        }
+
+        res.json({ success: true, message: 'Vehicle assigned successfully', data: assignmentInfo });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error during assignment' });
     } finally {
         if (connection) connection.release();
     }
@@ -101,6 +141,8 @@ const getOrders = async (req, res) => {
             params.push(req.user.id);
         }
 
+        query += ' ORDER BY o.created_at DESC';
+
         const [rows] = await pool.query(query, params);
         res.json({ success: true, count: rows.length, data: rows });
     } catch (error) {
@@ -109,12 +151,17 @@ const getOrders = async (req, res) => {
     }
 };
 
-// @desc    Update order
+// @desc    Update order status
 // @route   PUT /api/orders/:id
 // @access  Private
 const updateOrder = async (req, res) => {
-    const { pickup, delivery, weight, status } = req.body;
+    const { status } = req.body;
     const orderId = req.params.id;
+
+    const validStatuses = ['pending', 'assigned', 'shipped', 'delivered', 'cancelled'];
+    if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
 
     try {
         const [existing] = await pool.query('SELECT * FROM orders WHERE id = ?', [orderId]);
@@ -122,24 +169,18 @@ const updateOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        if (req.user.role === 'customer' && existing[0].customer_id !== req.user.id) {
-            return res.status(403).json({ success: false, message: 'Not authorized to update this order' });
-        }
-
-        const updatedPickup = pickup || existing[0].pickup;
-        const updatedDelivery = delivery || existing[0].delivery;
-        const updatedWeight = weight || existing[0].weight;
-        const updatedStatus = status || existing[0].status;
+        // Logic for following the flow: Pending -> Assigned -> Shipped -> Delivered
+        // (Just a warning for now, allowing arbitrary updates if needed but encouraging the flow in the UI)
 
         await pool.query(
-            'UPDATE orders SET pickup = ?, delivery = ?, weight = ?, status = ? WHERE id = ?',
-            [updatedPickup, updatedDelivery, updatedWeight, updatedStatus, orderId]
+            'UPDATE orders SET status = ? WHERE id = ?',
+            [status || existing[0].status, orderId]
         );
 
         res.json({
             success: true,
-            message: 'Order updated successfully',
-            data: { id: orderId, pickup: updatedPickup, delivery: updatedDelivery, weight: updatedWeight, status: updatedStatus }
+            message: 'Order status updated successfully',
+            data: { id: orderId, status: status || existing[0].status }
         });
     } catch (error) {
         console.error(error);
@@ -149,6 +190,7 @@ const updateOrder = async (req, res) => {
 
 module.exports = {
     createOrder,
+    assignOrder,
     getOrders,
     updateOrder
 };
