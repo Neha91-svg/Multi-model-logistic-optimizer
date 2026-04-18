@@ -40,6 +40,22 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (userData) => {
+        try {
+            const res = await api.post('/auth/register', userData);
+            const data = res.data;
+            setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
+            api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+            return { success: true };
+        } catch (error) {
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Registration failed' 
+            };
+        }
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
@@ -47,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, api }}>
+        <AuthContext.Provider value={{ user, login, register, logout, loading, api }}>
             {children}
         </AuthContext.Provider>
     );

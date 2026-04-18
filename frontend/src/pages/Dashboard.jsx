@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
     LayoutDashboard, Clock, CheckCircle2, Package, Truck, XCircle, 
-    TrendingUp, Activity, Star, Calendar, ArrowRight, User
+    TrendingUp, Activity, Star, Calendar, ArrowRight, User, LogOut
 } from 'lucide-react';
 import { 
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import StatsCard from '../components/StatsCard';
 
 const Dashboard = () => {
-  const { user, api } = useAuth();
+  const { user, api, logout } = useAuth();
   const [data, setData] = useState({
     stats: { total: 0, pending: 0, assigned: 0, shipped: 0, delivered: 0, cancelled: 0 },
     weeklyStats: [],
@@ -59,8 +59,8 @@ const Dashboard = () => {
           </h1>
           <p className="text-text-muted mt-2">Here's what's happening with your logistics today.</p>
         </div>
-        <div className="hidden md:flex gap-4">
-            <div className="glass px-4 py-2 rounded-xl flex items-center gap-3">
+        <div className="flex gap-4">
+            <div className="hidden md:flex glass px-4 py-2 rounded-xl items-center gap-3">
                 <div className="p-2 bg-green-500/10 rounded-lg">
                     <Calendar className="w-4 h-4 text-green-500" />
                 </div>
@@ -69,6 +69,13 @@ const Dashboard = () => {
                     <p className="text-lg font-bold">{todayCount}</p>
                 </div>
             </div>
+            <button 
+                onClick={logout}
+                className="glass px-4 py-2 rounded-xl flex items-center gap-2 text-red-400 hover:bg-red-500/10 transition-colors font-bold text-sm"
+            >
+                <LogOut className="w-4 h-4" />
+                Logout
+            </button>
         </div>
       </header>
 
