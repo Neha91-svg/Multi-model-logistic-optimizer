@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,7 +90,12 @@ const Login = () => {
         </form>
 
         <p className="text-center mt-8 text-sm text-text-muted">
-          Don't have an account? <span className="text-primary hover:underline cursor-pointer">Register now</span>
+          Don't have an account? <span 
+            onClick={() => navigate('/register')} 
+            className="text-primary hover:underline cursor-pointer font-semibold"
+          >
+            Register now
+          </span>
         </p>
       </motion.div>
     </div>
