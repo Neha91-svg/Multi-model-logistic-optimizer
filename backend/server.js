@@ -22,7 +22,8 @@ app.use('/api', testRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/vehicles', vehicleRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/stats', dashboardRoutes);
+app.use('/api/dashboard', dashboardRoutes); // backward compatibility
 
 // Root route
 app.get('/', (req, res) => {

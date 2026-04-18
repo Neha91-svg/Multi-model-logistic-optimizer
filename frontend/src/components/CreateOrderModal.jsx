@@ -1,28 +1,21 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Package, MapPin, Weight, Loader2, Plus, ArrowRight, Zap } from 'lucide-react';
+import { X, Send, Package, MapPin, Weight, Loader2, Sparkles, ChevronRight } from 'lucide-react';
 
 const CreateOrderModal = ({ isOpen, onClose, onSuccess, api }) => {
-    const [formData, setFormData] = useState({
-        pickup: '',
-        delivery: '',
-        weight: ''
-    });
+    const [formData, setFormData] = useState({ pickup: '', delivery: '', weight: '' });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
-
         try {
             await api.post('/orders', formData);
             onSuccess();
             onClose();
             setFormData({ pickup: '', delivery: '', weight: '' });
-        } catch (err) {
-            setError(err.response?.data?.message || 'Failed to create order');
+        } catch (error) {
+            alert('Failed to create mission protocol');
         } finally {
             setLoading(false);
         }
@@ -31,114 +24,97 @@ const CreateOrderModal = ({ isOpen, onClose, onSuccess, api }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                    <motion.div
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-bg-darker/90 backdrop-blur-md"
+                        className="absolute inset-0 bg-bg-darker/60 backdrop-blur-xl"
                     />
                     
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 40 }}
-                        className="glass relative w-full max-w-xl rounded-[40px] p-10 lg:p-12 shadow-2xl z-10 overflow-hidden"
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="glass w-full max-w-lg rounded-[48px] p-10 relative overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]"
                     >
-                        <div className="absolute top-0 right-0 p-8 opacity-5">
-                            <Zap className="w-40 h-40 text-primary" />
-                        </div>
-
-                        <header className="flex justify-between items-start mb-10 relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+                        
+                        <div className="flex justify-between items-center mb-10">
                             <div className="flex items-center gap-4">
-                                <div className="p-4 bg-primary/10 rounded-2xl glow-primary">
-                                    <Package className="w-8 h-8 text-primary" />
+                                <div className="p-3.5 bg-primary/10 rounded-2xl glow-primary">
+                                    <Package className="w-5 h-5 text-primary" />
                                 </div>
                                 <div>
-                                    <h2 className="text-3xl font-black tracking-tight leading-none">New <span className="gradient-text italic">Mission</span></h2>
-                                    <p className="text-xs text-text-muted mt-2 font-bold uppercase tracking-widest">Initialize delivery trajectory</p>
+                                    <h2 className="text-2xl font-black tracking-tight leading-none">Initialize <span className="text-primary italic">Mission</span></h2>
+                                    <p className="text-[10px] text-text-muted mt-2 font-black uppercase tracking-[0.2em]">Deployment protocol v4.0</p>
                                 </div>
                             </div>
-                            <button 
-                                onClick={onClose}
-                                className="p-3 hover:bg-white/5 rounded-2xl transition-colors border border-transparent hover:border-white/5"
-                            >
-                                <X className="w-6 h-6 text-text-muted" />
+                            <button onClick={onClose} className="p-3 hover:bg-white/5 rounded-2xl text-text-muted hover:text-white transition-all">
+                                <X className="w-6 h-6" />
                             </button>
-                        </header>
+                        </div>
 
-                        {error && (
-                            <motion.div 
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                className="p-4 bg-error/10 border border-error/50 rounded-2xl text-error text-sm mb-8 text-center"
-                            >
-                                {error}
-                            </motion.div>
-                        )}
-
-                        <form onSubmit={handleSubmit} className="space-y-8 relative">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="space-y-3">
-                                    <label className="text-xs font-black text-text-muted ml-2 uppercase tracking-widest flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 text-primary" /> Origin
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full rounded-2xl py-4 px-6 text-text-main"
-                                        placeholder="Traj-Center Alpha"
-                                        value={formData.pickup}
-                                        onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="space-y-3">
-                                    <label className="text-xs font-black text-text-muted ml-2 uppercase tracking-widest flex items-center gap-2">
-                                        <MapPin className="w-4 h-4 text-secondary" /> Destination
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full rounded-2xl py-4 px-6 text-text-main"
-                                        placeholder="Traj-Center Beta"
-                                        value={formData.delivery}
-                                        onChange={(e) => setFormData({ ...formData, delivery: e.target.value })}
-                                    />
-                                </div>
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-muted ml-2 uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <MapPin className="w-3 h-3" /> Pickup Vector
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full rounded-2xl py-5 px-6 text-text-main"
+                                    placeholder="Origin Hub Alpha"
+                                    value={formData.pickup}
+                                    onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                                />
                             </div>
 
-                            <div className="space-y-3">
-                                <label className="text-xs font-black text-text-muted ml-2 uppercase tracking-widest flex items-center gap-2">
-                                    <Weight className="w-4 h-4 text-accent" /> Payload Mass (KG)
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-muted ml-2 uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <Send className="w-3 h-3" /> Delivery Destination
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full rounded-2xl py-5 px-6 text-text-main"
+                                    placeholder="Destination Node Beta"
+                                    value={formData.delivery}
+                                    onChange={(e) => setFormData({...formData, delivery: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-text-muted ml-2 uppercase tracking-[0.3em] flex items-center gap-2">
+                                    <Weight className="w-3 h-3" /> Payload Mass (KG)
                                 </label>
                                 <input
                                     type="number"
                                     required
-                                    min="0.1"
-                                    step="0.1"
-                                    className="w-full rounded-2xl py-4 px-6 text-text-main"
-                                    placeholder="000.00"
+                                    className="w-full rounded-2xl py-5 px-6 text-text-main"
+                                    placeholder="0.00"
                                     value={formData.weight}
-                                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
                                 />
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-primary hover:bg-indigo-600 active:scale-95 text-white font-black py-5 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20 btn-premium mt-6"
-                            >
-                                {loading ? (
-                                    <Loader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                    <>
-                                        Authorize Mission
-                                        <ArrowRight className="w-5 h-5" />
-                                    </>
-                                )}
-                            </button>
+                            <div className="pt-6">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-primary hover:bg-indigo-600 px-8 py-5 rounded-2xl flex items-center justify-center gap-4 text-white font-black transition-all shadow-2xl shadow-primary/20 btn-premium group"
+                                >
+                                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                                        <>
+                                            <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                                            Commence Distribution
+                                            <ChevronRight className="w-5 h-5" />
+                                        </>
+                                    )}
+                                </button>
+                                <p className="text-[9px] text-text-muted text-center mt-6 font-bold uppercase tracking-[0.4em] opacity-40">Secure encryption active during transmission</p>
+                            </div>
                         </form>
                     </motion.div>
                 </div>

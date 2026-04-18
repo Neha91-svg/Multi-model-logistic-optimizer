@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Orders from './pages/Orders';
+import OrderDetails from './pages/OrderDetails';
 import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -28,6 +30,22 @@ const AppContent = () => {
                     element={
                         <ProtectedRoute>
                             <Dashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/orders" 
+                    element={
+                        <ProtectedRoute>
+                            <Orders />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/orders/:id" 
+                    element={
+                        <ProtectedRoute>
+                            <OrderDetails />
                         </ProtectedRoute>
                     } 
                 />
