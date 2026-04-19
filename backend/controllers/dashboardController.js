@@ -112,6 +112,46 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// @desc    Get all activity history
+// @route   GET /api/stats/activities
+// @access  Private
+const getActivities = async (req, res) => {
+    try {
+        const isCustomer = req.user.role === 'customer';
+        const userId = req.user.id;
+
+        let query = `
+            SELECT h.status, h.created_at, h.order_id, u.name as customer_name
+            FROM order_status_history h
+            JOIN orders o ON h.order_id = o.id
+            JOIN users u ON o.customer_id = u.id
+        `;
+        let params = [];
+        if (isCustomer) {
+            query += ' WHERE o.customer_id = ?';
+            params.push(userId);
+        }
+        query += ' ORDER BY h.created_at DESC LIMIT 50';
+        
+        const [rows] = await pool.query(query, params);
+
+        const activities = rows.map(row => ({
+            id: `${row.order_id}-${row.status}-${row.created_at}`,
+            order_id: row.order_id,
+            status: row.status,
+            message: `Mission #${row.order_id.toString().padStart(4, '0')} status updated to ${row.status.toUpperCase()}`,
+            time: row.created_at,
+            customer: row.customer_name
+        }));
+
+        res.json({ success: true, data: activities });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error while fetching activity logs' });
+    }
+};
+
 module.exports = {
-    getDashboardStats
+    getDashboardStats,
+    getActivities
 };

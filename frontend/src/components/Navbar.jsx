@@ -51,7 +51,10 @@ const Navbar = () => {
                     <div className="w-px h-6 bg-white/10 hidden sm:block" />
 
                     <div className="flex items-center gap-6">
-                        <button className="p-2.5 hover:bg-white/5 rounded-xl transition-colors relative group">
+                        <button 
+                            onClick={() => navigate('/notifications')}
+                            className="p-2.5 hover:bg-white/5 rounded-xl transition-colors relative group"
+                        >
                             <Bell className="w-5 h-5 text-text-muted group-hover:text-primary transition-colors" />
                             <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_var(--color-primary-glow)]" />
                         </button>

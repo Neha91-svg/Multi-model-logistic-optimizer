@@ -10,6 +10,7 @@ import Vehicles from './pages/Vehicles';
 import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
 import RouteVisualization from './pages/RouteVisualization';
+import Notifications from './pages/Notifications';
 import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -82,6 +83,14 @@ const AppContent = () => {
                     element={
                         <ProtectedRoute>
                             <RouteVisualization />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/notifications" 
+                    element={
+                        <ProtectedRoute>
+                            <Notifications />
                         </ProtectedRoute>
                     } 
                 />
