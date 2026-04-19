@@ -125,9 +125,18 @@ const OrderDetails = () => {
                                 <div className="p-4 bg-primary/10 rounded-2xl glow-primary">
                                     <TrendingUp className="w-5 h-5 text-primary" />
                                 </div>
-                                <div>
-                                    <h2 className="text-2xl font-black tracking-tight">Trajectory Data</h2>
-                                    <p className="text-[10px] text-text-muted uppercase font-black tracking-[0.2em] mt-1">Operational route analysis</p>
+                                <div className="flex-1 flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-2xl font-black tracking-tight">Trajectory Data</h2>
+                                        <p className="text-[10px] text-text-muted uppercase font-black tracking-[0.2em] mt-1">Operational route analysis</p>
+                                    </div>
+                                    <button 
+                                        onClick={() => navigate(`/orders/${id}/route`)}
+                                        className="px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl border border-primary/20 transition-all font-black text-[9px] uppercase tracking-widest flex items-center gap-2 group/nav"
+                                    >
+                                        Launch Tactical Overlay
+                                        <ExternalLink className="w-3.5 h-3.5 group-hover/nav:translate-x-1 group-hover/nav:-translate-y-1 transition-transform" />
+                                    </button>
                                 </div>
                             </div>
 

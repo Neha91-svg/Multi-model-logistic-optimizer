@@ -185,6 +185,13 @@ const Orders = () => {
                                                 >
                                                     <ExternalLink className="w-4 h-4" />
                                                 </button>
+                                                <button 
+                                                    onClick={() => navigate(`/orders/${order.id}/route`)}
+                                                    className="p-3 bg-secondary/10 hover:bg-secondary text-secondary hover:text-white rounded-xl transition-all border border-secondary/20"
+                                                    title="Tactical Map"
+                                                >
+                                                    <Navigation className="w-4 h-4" />
+                                                </button>
                                                 
                                                 {/* Conditional Flow Buttons */}
                                                 {order.status === 'pending' && (

@@ -9,6 +9,7 @@ import OrderDetails from './pages/OrderDetails';
 import Vehicles from './pages/Vehicles';
 import Profile from './pages/Profile';
 import Analytics from './pages/Analytics';
+import RouteVisualization from './pages/RouteVisualization';
 import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -73,6 +74,14 @@ const AppContent = () => {
                     element={
                         <ProtectedRoute>
                             <Analytics />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/orders/:id/route" 
+                    element={
+                        <ProtectedRoute>
+                            <RouteVisualization />
                         </ProtectedRoute>
                     } 
                 />
