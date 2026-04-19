@@ -8,6 +8,7 @@ import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
 import Vehicles from './pages/Vehicles';
 import Profile from './pages/Profile';
+import Analytics from './pages/Analytics';
 import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -64,6 +65,14 @@ const AppContent = () => {
                     element={
                         <ProtectedRoute>
                             <Profile />
+                        </ProtectedRoute>
+                    } 
+                />
+                <Route 
+                    path="/analytics" 
+                    element={
+                        <ProtectedRoute>
+                            <Analytics />
                         </ProtectedRoute>
                     } 
                 />
