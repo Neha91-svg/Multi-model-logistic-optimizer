@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Package, Search, Filter, ChevronRight, Eye, Trash2, 
     Clock, CheckCircle2, Star, TrendingUp, X, MapPin, 
-    Weight, Truck, Send, Check, AlertCircle, Info, MoreHorizontal, ExternalLink
+    Weight, Truck, Send, Check, AlertCircle, Info, MoreHorizontal, ExternalLink, Navigation
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
