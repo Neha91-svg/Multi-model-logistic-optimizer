@@ -9,9 +9,7 @@ const generateToken = (id) => {
     });
 };
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
+
 const registerUser = async (req, res) => {
     const { name, email, password, role } = req.body;
 

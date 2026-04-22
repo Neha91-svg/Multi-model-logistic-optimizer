@@ -6,31 +6,31 @@ A premium, full-stack logistics management platform designed for efficient route
 
 ## ✨ Features
 
-- **🚀 Interactive Dashboard**: Real-time overview of logistics operations with dynamic KPIs.
-- **📊 Advanced Analytics**: Detailed charts and insights powered by Recharts.
-- **📦 Order Management**: Comprehensive lifecycle tracking from pending to delivered.
-- **🚚 Fleet & Vehicle Management**: Monitor vehicle status, capacity, and driver assignments.
+- **🚀 Interactive Dashboard**: Real-time overview of logistics operations with dynamic KPIs and visual status tracking.
+- **📊 Advanced Analytics**: Detailed charts and insights powered by Recharts for data-driven decision making.
+- **📦 Order Management**: Comprehensive lifecycle tracking from pending to delivered with automated status history.
+- **🚚 Fleet & Vehicle Management**: Monitor vehicle status, capacity, and driver assignments with a dedicated "Asset Terminal".
 - **📍 Route Visualization**: Intuitive display of pickup-to-delivery paths with distance and time metrics.
-- **🔒 Secure Authentication**: Robust JWT-based authentication with Bcrypt password hashing.
-- **👤 Profile Management**: User profile customization and password updates.
-- **🔔 Notifications**: Real-time system notifications for critical updates.
+- **🔒 Secure Authentication**: Robust JWT-based authentication with Bcrypt password hashing and role-based access control.
+- **👤 Profile Management**: User profile customization, security settings, and password updates.
+- **🔔 Notifications**: Real-time system notifications for critical logistics updates and order status changes.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Framework**: [React](https://reactjs.org/) (Vite)
+- **Framework**: [React 19](https://reactjs.org/) (Vite)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Charts**: [Recharts](https://recharts.org/)
 - **State Management**: React Context API
-- **Routing**: React Router v7
+- **Routing**: [React Router v7](https://reactrouter.com/)
 
 ### Backend
 - **Runtime**: [Node.js](https://nodejs.org/)
-- **Framework**: [Express](https://expressjs.com/)
+- **Framework**: [Express 5](https://expressjs.com/)
 - **Database**: [MySQL](https://www.mysql.com/)
 - **Auth**: JWT (JSON Web Tokens) & Bcrypt
 
@@ -41,20 +41,20 @@ A premium, full-stack logistics management platform designed for efficient route
 ```text
 multi-model-logistic-optimizer/
 ├── backend/                # Node.js Express server
-│   ├── config/             # Database connection
-│   ├── controllers/        # Business logic
-│   ├── middleware/         # Auth & security
-│   ├── routes/             # API endpoints
-│   ├── schema.sql          # Database schema
-│   └── server.js           # Entry point
+│   ├── config/             # Database connection & initialization
+│   ├── controllers/        # Business logic & route handlers
+│   ├── middleware/         # Auth, security & error handling
+│   ├── routes/             # API endpoint definitions
+│   ├── schema.sql          # SQL schema for MySQL database
+│   └── server.js           # Server entry point
 ├── frontend/               # React Vite application
 │   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── context/        # Global state
-│   │   ├── pages/          # Full-page views
-│   │   └── App.jsx         # Main router
-│   └── index.html
-└── package.json            # Base configuration
+│   │   ├── components/     # Reusable UI components (Navbar, Sidebar, Tables)
+│   │   ├── context/        # Global state (Auth, Notifications)
+│   │   ├── pages/          # Full-page views (Dashboard, Orders, Analytics)
+│   │   └── App.jsx         # Main router and layout
+│   └── index.html          # Entry HTML
+└── package.json            # Project-wide information
 ```
 
 ---
@@ -62,58 +62,87 @@ multi-model-logistic-optimizer/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
-- MySQL Server
+- **Node.js**: v18 or higher
+- **Package Manager**: npm or yarn
+- **Database**: MySQL Server
 
 ### Database Setup
 1. Create a MySQL database named `logistics_db`.
-2. Import the schema:
+2. Import the schema to initialize tables:
    ```bash
    mysql -u your_user -p logistics_db < backend/schema.sql
    ```
 
-### Backend Installation
-1. Navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Configure environment variables in `.env`:
-   ```env
-   PORT=5000
-   DB_HOST=localhost
-   DB_USER=your_user
-   DB_PASS=your_password
-   DB_NAME=logistics_db
-   JWT_SECRET=your_super_secret_key
-   ```
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
+### ⚙️ Environment Configuration
 
-### Frontend Installation
-1. Navigate to the frontend folder:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+Create a `.env` file in the `backend` directory with the following variables:
+
+| Variable | Description | Example |
+| :--- | :--- | :--- |
+| `PORT` | Backend server port | `5000` |
+| `DB_HOST` | MySQL database host | `localhost` |
+| `DB_USER` | MySQL username | `root` |
+| `DB_PASS` | MySQL password | `your_password` |
+| `DB_NAME` | Database name | `logistics_db` |
+| `JWT_SECRET` | Secret key for JWT signing | `your_super_secret_key` |
+
+---
+
+## 📡 API Endpoints (Quick Reference)
+
+### Authentication
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Authenticate user & get token
+
+### Orders
+- `GET /api/orders` - Fetch all orders (protected)
+- `POST /api/orders` - Create a new order (protected)
+- `GET /api/orders/:id` - Get specific order details
+- `POST /api/orders/:id/assign` - Assign vehicle to order
+
+### Vehicles
+- `GET /api/vehicles` - Fetch all fleet assets
+- `POST /api/vehicles` - Deploy new vehicle asset
+
+---
+
+## 💻 Installation & Development
+
+#### Backend
+```bash
+# Navigate to backend
+cd backend
+
+# Install dependencies
+npm install
+
+# Run in development mode (nodemon)
+npm run dev
+
+# Start production server
+npm start
+```
+
+#### Frontend
+```bash
+# Navigate to frontend
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start Vite dev server
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ---
 
 ## 📝 License
 
-This project is licensed under the ISC License.
+This project is licensed under the **ISC License**.
 
 ---
 
