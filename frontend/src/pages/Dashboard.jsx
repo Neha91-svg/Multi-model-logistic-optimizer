@@ -27,6 +27,8 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState(new Date());
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -46,6 +48,17 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
+
+  useEffect(() => {
+    let interval;
+    if (autoRefresh) {
+      interval = setInterval(() => {
+        fetchDashboardData();
+        setLastRefreshed(new Date());
+      }, 30000); // 30 seconds
+    }
+    return () => clearInterval(interval);
+  }, [autoRefresh, fetchDashboardData]);
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -91,16 +104,29 @@ const Dashboard = () => {
             </p>
           </motion.div>
           
-          <motion.button 
-            variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsModalOpen(true)}
-            className="btn-premium px-8 py-4 rounded-2xl glow-primary flex items-center gap-3 font-black text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all"
-          >
-            <Plus className="w-5 h-5" />
-            Initialize Mission
-          </motion.button>
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4">
+            <button 
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                autoRefresh 
+                ? 'bg-primary/20 border-primary text-primary glow-primary' 
+                : 'bg-white/5 border-white/10 text-text-muted hover:bg-white/10'
+              }`}
+            >
+              <Activity className={`w-3 h-3 ${autoRefresh ? 'animate-pulse' : ''}`} />
+              {autoRefresh ? 'Live Feed Active' : 'Enable Live Feed'}
+            </button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsModalOpen(true)}
+              className="btn-premium px-8 py-4 rounded-2xl glow-primary flex items-center gap-3 font-black text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_40px_rgba(79,70,229,0.5)] transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              Initialize Mission
+            </motion.button>
+          </motion.div>
         </header>
 
         {/* Stats Grid */}
