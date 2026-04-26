@@ -7,6 +7,7 @@ A premium, full-stack logistics management platform designed for efficient route
 ## ✨ Features
 
 - **🚀 Interactive Dashboard**: Real-time overview of logistics operations with dynamic KPIs and visual status tracking.
+- **⚡ Live Feed Monitoring**: Integrated auto-refresh toggle for real-time operational updates every 30 seconds.
 - **📊 Advanced Analytics**: Detailed charts and insights powered by Recharts for data-driven decision making.
 - **📦 Order Management**: Comprehensive lifecycle tracking from pending to delivered with automated status history.
 - **🚚 Fleet & Vehicle Management**: Monitor vehicle status, capacity, and driver assignments with a dedicated "Asset Terminal".
