@@ -67,10 +67,15 @@ multi-model-logistic-optimizer/
 - **Database**: MySQL Server
 
 ### Database Setup
-1. Create a MySQL database named `logistics_db`.
-2. Import the schema to initialize tables:
+1. Create a MySQL database named `logistic_optimizer` (or as specified in your `.env`).
+2. Run the automated setup script from the `backend` directory to initialize tables and seed data:
    ```bash
-   mysql -u your_user -p logistics_db < backend/schema.sql
+   cd backend
+   npm run db:setup
+   ```
+   *Alternatively, you can manually import the schema:*
+   ```bash
+   mysql -u your_user -p logistic_optimizer < backend/schema.sql
    ```
 
 ### ⚙️ Environment Configuration
